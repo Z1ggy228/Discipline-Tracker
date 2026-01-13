@@ -1,1053 +1,741 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Discipline Tracker</title>
-    <style>
-      :root {
-        --bg: #0b0f14;
-        --card: #111827;
-        --card2: #0f172a;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --accent: #60a5fa;
-        --good: #34d399;
-        --bad: #fb7185;
-        --warn: #fbbf24;
-        --line: #243244;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-        --radius: 16px;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-        background: radial-gradient(1000px 600px at 20% -10%, rgba(96, 165, 250, 0.18), transparent 60%),
-          radial-gradient(900px 500px at 90% 10%, rgba(52, 211, 153, 0.12), transparent 55%), var(--bg);
-        color: var(--text);
-      }
-      .wrap {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 22px;
-      }
-      header {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: flex-end;
-        justify-content: space-between;
-        margin-bottom: 14px;
-      }
-      h1 {
-        font-size: 20px;
-        margin: 0;
-        letter-spacing: 0.2px;
-      }
-      .sub {
-        color: var(--muted);
-        font-size: 13px;
-        margin-top: 4px;
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        gap: 14px;
-      }
-      @media (max-width: 980px) {
-        .row {
-          grid-template-columns: 1fr;
-        }
-      }
-      .card {
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 14px;
-      }
-      .card h2 {
-        font-size: 14px;
-        margin: 0 0 10px;
-        color: #cbd5e1;
-        font-weight: 600;
-      }
-      .grid2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      @media (max-width: 560px) {
-        .grid2 {
-          grid-template-columns: 1fr;
-        }
-      }
-      label {
-        display: block;
-        color: var(--muted);
-        font-size: 12px;
-        margin: 0 0 6px;
-      }
-      input[type='time'],
-      input[type='date'],
-      input[type='text'],
-      input[type='number'],
-      textarea,
-      select {
-        width: 100%;
-        background: rgba(15, 23, 42, 0.55);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--text);
-        padding: 10px 10px;
-        border-radius: 12px;
-        outline: none;
-      }
-      textarea {
-        min-height: 86px;
-        resize: vertical;
-      }
-      .btns {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      button {
-        background: rgba(96, 165, 250, 0.14);
-        border: 1px solid rgba(96, 165, 250, 0.25);
-        color: var(--text);
-        padding: 9px 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: transform 0.05s ease, background 0.2s ease;
-        font-weight: 600;
-        font-size: 13px;
-      }
-      button:hover {
-        background: rgba(96, 165, 250, 0.22);
-      }
-      button:active {
-        transform: translateY(1px);
-      }
-      .ghost {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .danger {
-        background: rgba(251, 113, 133, 0.14);
-        border-color: rgba(251, 113, 133, 0.3);
-      }
-      .good {
-        background: rgba(52, 211, 153, 0.12);
-        border-color: rgba(52, 211, 153, 0.25);
-      }
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.06);
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .tag b {
-        color: var(--text);
-        font-weight: 700;
-      }
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .hr {
-        height: 1px;
-        background: rgba(255, 255, 255, 0.08);
-        margin: 12px 0;
-      }
-      .todayHead {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .big {
-        font-size: 18px;
-        font-weight: 800;
-        letter-spacing: 0.3px;
-      }
-      .muted {
-        color: var(--muted);
-      }
-      .todoItem {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-        padding: 10px;
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        margin-bottom: 8px;
-      }
-      .todoItem input[type='checkbox'] {
-        transform: translateY(2px);
-        width: 18px;
-        height: 18px;
-      }
-      .todoText {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-      }
-      .todoText .title {
-        font-weight: 700;
-        font-size: 13px;
-      }
-      .todoText .note {
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .miniBtn {
-        padding: 7px 10px;
-        border-radius: 10px;
-        font-size: 12px;
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(255, 255, 255, 0.1);
-      }
-      .kpi {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-      }
-      @media (max-width: 980px) {
-        .kpi {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-      .kpiBox {
-        padding: 12px;
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.35);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-      }
-      .kpiBox .v {
-        font-size: 20px;
-        font-weight: 900;
-      }
-      .kpiBox .t {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 3px;
-      }
-      .pomodoro {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        align-items: center;
-      }
-      @media (max-width: 560px) {
-        .pomodoro {
-          grid-template-columns: 1fr;
-        }
-      }
-      .timer {
-        font-size: 34px;
-        font-weight: 900;
-        letter-spacing: 1px;
-        padding: 14px;
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        text-align: center;
-      }
-      .pill {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-end;
-      }
-      .small {
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .ok {
-        color: var(--good);
-      }
-      .no {
-        color: var(--bad);
-      }
-      .warn {
-        color: var(--warn);
-      }
-      footer {
-        margin-top: 14px;
-        color: var(--muted);
-        font-size: 12px;
-      }
-      .link {
-        color: #93c5fd;
-        text-decoration: none;
-      }
-      .link:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Discipline Tracker</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --card:#111827; --text:#e5e7eb; --muted:#9ca3af;
+      --accent:#60a5fa; --good:#34d399; --bad:#fb7185; --warn:#fbbf24; --line:#243244;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1000px 600px at 20% -10%, rgba(96,165,250,.18), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(52,211,153,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:22px;}
+    header{
+      display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; justify-content:space-between;
+      margin-bottom:14px;
+    }
+    h1{font-size:20px; margin:0; letter-spacing:.2px}
+    .sub{color:var(--muted); font-size:13px; margin-top:4px}
+    .row{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;}
+    @media (max-width: 980px){ .row{grid-template-columns:1fr; } }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .card h2{font-size:14px; margin:0 0 10px; color:#cbd5e1; font-weight:600}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    @media (max-width: 560px){ .grid2{grid-template-columns:1fr} }
+    label{display:block; color:var(--muted); font-size:12px; margin:0 0 6px}
+    input[type="time"], input[type="date"], input[type="text"], input[type="number"], textarea{
+      width:100%;
+      background: rgba(15,23,42,.55);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 10px;
+      border-radius: 12px;
+      outline:none;
+    }
+    textarea{min-height:86px; resize:vertical}
+    .btns{display:flex; flex-wrap:wrap; gap:8px}
+    button{
+      background: rgba(96,165,250,.14);
+      border:1px solid rgba(96,165,250,.25);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition: transform .05s ease, background .2s ease;
+      font-weight:600;
+      font-size:13px;
+    }
+    button:hover{ background: rgba(96,165,250,.22); }
+    button:active{ transform: translateY(1px); }
+    .ghost{ background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
+    .danger{ background: rgba(251,113,133,.14); border-color: rgba(251,113,133,.30); }
+    .good{ background: rgba(52,211,153,.12); border-color: rgba(52,211,153,.25); }
+    .tag{
+      display:inline-flex; align-items:center; gap:7px;
+      padding:7px 10px; border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      font-size:12px;
+      color: var(--muted);
+    }
+    .tag b{color:var(--text); font-weight:800}
+    .tags{display:flex; flex-wrap:wrap; gap:8px}
+    .hr{height:1px; background: rgba(255,255,255,.08); margin:12px 0}
+    .todayHead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .big{font-size:18px; font-weight:900; letter-spacing:.3px}
+    .muted{color:var(--muted)}
+    .todoItem{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:10px; border-radius: 14px;
+      background: rgba(15,23,42,.35);
+      border:1px solid rgba(255,255,255,.06);
+      margin-bottom:8px;
+    }
+    .todoItem input[type="checkbox"]{transform: translateY(2px); width:18px; height:18px}
+    .todoText{flex:1; display:flex; flex-direction:column; gap:3px}
+    .todoText .title{font-weight:800; font-size:13px}
+    .todoText .note{font-size:12px; color:var(--muted)}
+    .miniBtn{
+      padding:7px 10px; border-radius:10px; font-size:12px;
+      background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10);
+    }
+    .kpi{
+      display:grid; grid-template-columns: repeat(4, 1fr); gap:10px;
+    }
+    @media (max-width: 980px){ .kpi{grid-template-columns: repeat(2,1fr);} }
+    .kpiBox{
+      padding:12px; border-radius: 14px;
+      background: rgba(15,23,42,.35);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .kpiBox .v{font-size:20px; font-weight:900}
+    .kpiBox .t{font-size:12px; color:var(--muted); margin-top:3px}
+    .pill{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .small{font-size:12px; color:var(--muted)}
+    .ok{color:var(--good)}
+    .no{color:var(--bad)}
+    .warn{color:var(--warn)}
+    footer{margin-top:14px; color:var(--muted); font-size:12px}
+  </style>
+</head>
 
-  <body>
-    <div class="wrap">
-      <header>
-        <div>
-          <h1>Discipline Tracker</h1>
-          <div class="sub">Режим → 1 задача → 4 часа. Данные сохраняются локально (localStorage).</div>
-        </div>
-        <div class="tags" id="headerTags"></div>
-      </header>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Discipline Tracker</h1>
+        <div class="sub">Режим → 1 задача → фокус-минуты. Всё хранится в localStorage.</div>
+      </div>
+      <div class="tags" id="headerTags"></div>
+    </header>
 
-      <div class="row">
-        <!-- LEFT -->
-        <div class="card">
-          <div class="todayHead">
-            <div>
-              <div class="muted" style="font-size: 12px">День</div>
-              <div class="big" id="todayLabel">—</div>
-            </div>
-            <div class="pill">
-              <span class="tag"><span>Старт работы:</span> <b id="kWorkStart">—</b></span>
-              <span class="tag"><span>Фокус:</span> <b id="kFocus">—</b></span>
-            </div>
+    <div class="row">
+      <!-- LEFT -->
+      <div class="card">
+        <div class="todayHead">
+          <div>
+            <div class="muted" style="font-size:12px;">День</div>
+            <div class="big" id="todayLabel">—</div>
           </div>
-
-          <div class="hr"></div>
-
-          <div class="grid2">
-            <div>
-              <label for="focusTask">Главная задача дня (1 штука)</label>
-              <input id="focusTask" type="text" placeholder="Напр: доделать адаптив в Tilda" />
-            </div>
-            <div>
-              <label for="workMinutesGoal">Цель по работе (минуты)</label>
-              <input id="workMinutesGoal" type="number" min="60" step="10" />
-              <div class="small" style="margin-top: 6px">По умолчанию 240 минут = 4 часа.</div>
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="grid2">
-            <div>
-              <label for="notes">Заметки (что мешало / что помогло)</label>
-              <textarea id="notes" placeholder="Коротко: что было сложным, что сработало"></textarea>
-            </div>
-
-            <div>
-              <h2 style="margin: 0 0 10px">Дневной чеклист</h2>
-              <div id="todoList"></div>
-
-              <div class="grid2" style="margin-top: 10px">
-                <div>
-                  <label for="newTodoTitle">Добавить пункт</label>
-                  <input id="newTodoTitle" type="text" placeholder="Напр: 4 помодоро" />
-                </div>
-                <div style="display: flex; align-items: flex-end; gap: 8px">
-                  <button class="good" id="addTodoBtn" style="width: 100%">Добавить</button>
-                </div>
-              </div>
-
-              <div class="btns" style="margin-top: 10px">
-                <button class="ghost" id="copyYesterdayBtn">Скопировать чеклист со вчера</button>
-                <button class="danger" id="resetTodayBtn">Сбросить сегодняшний день</button>
-              </div>
-            </div>
+          <div class="pill">
+            <span class="tag"><span>Старт работы:</span> <b id="kWorkStart">—</b></span>
+            <span class="tag"><span>Фокус:</span> <b id="kFocus">—</b></span>
           </div>
         </div>
 
-        <!-- RIGHT -->
-        <div>
-          <div class="card">
-            <h2>Режим</h2>
+        <div class="hr"></div>
+
+        <div class="grid2">
+          <div>
+            <label for="focusTask">Главная задача дня (1 штука)</label>
+            <input id="focusTask" type="text" placeholder="Напр: доделать адаптив в Tilda" />
+          </div>
+          <div>
+            <label for="workMinutesGoal">Цель по фокусу (минуты)</label>
+            <input id="workMinutesGoal" type="number" min="60" step="10" />
+            <div class="small" style="margin-top:6px;">По умолчанию 240 минут = 4 часа.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid2">
+          <div>
+            <label for="notes">Заметки (что мешало / что помогло)</label>
+            <textarea id="notes" placeholder="Коротко: что было сложным, что сработало"></textarea>
+
+            <div class="hr"></div>
+
+            <h2 style="margin:0 0 10px;">Фокус-время (вручную)</h2>
             <div class="grid2">
               <div>
-                <label for="sleepTime">Ложусь (план)</label>
-                <input id="sleepTime" type="time" />
+                <label for="manualMinutes">Добавить минут</label>
+                <input id="manualMinutes" type="number" min="5" step="5" placeholder="Напр: 25" />
               </div>
-              <div>
-                <label for="wakeTime">Встаю (план)</label>
-                <input id="wakeTime" type="time" />
-              </div>
-              <div>
-                <label for="workStartTime">Сажусь за комп (план)</label>
-                <input id="workStartTime" type="time" />
-              </div>
-              <div>
-                <label for="startDate">Старт “пути дисциплины”</label>
-                <input id="startDate" type="date" />
+              <div style="display:flex; align-items:flex-end; gap:8px;">
+                <button class="good" id="addMinutesBtn" style="width:100%;">Добавить</button>
               </div>
             </div>
 
-            <div class="hr"></div>
-
-            <div class="kpi">
-              <div class="kpiBox">
-                <div class="v" id="kpiStreak">—</div>
-                <div class="t">Серия “день засчитан”</div>
-              </div>
-              <div class="kpiBox">
-                <div class="v" id="kpiDaysDone">—</div>
-                <div class="t">Засчитано дней (за 30)</div>
-              </div>
-              <div class="kpiBox">
-                <div class="v" id="kpiWorkMin">—</div>
-                <div class="t">Работа сегодня (мин)</div>
-              </div>
-              <div class="kpiBox">
-                <div class="v" id="kpiSleepWin">—</div>
-                <div class="t">Режим (оценка)</div>
-              </div>
+            <div class="btns" style="margin-top:10px;">
+              <button class="ghost" id="plus25Btn">+25</button>
+              <button class="ghost" id="plus50Btn">+50</button>
+              <button class="ghost danger" id="minus25Btn">-25</button>
+              <button class="ghost danger" id="minus50Btn">-50</button>
             </div>
 
-            <div class="hr"></div>
-
-            <h2 style="margin-top: 0">Помодоро</h2>
-            <div class="pomodoro">
-              <div class="timer" id="timerLabel">25:00</div>
-              <div>
-                <div class="grid2">
-                  <div>
-                    <label for="pomodoroWork">Работа (мин)</label>
-                    <input id="pomodoroWork" type="number" min="10" max="90" step="1" />
-                  </div>
-                  <div>
-                    <label for="pomodoroBreak">Перерыв (мин)</label>
-                    <input id="pomodoroBreak" type="number" min="3" max="30" step="1" />
-                  </div>
-                </div>
-                <div class="btns" style="margin-top: 10px; justify-content: flex-end">
-                  <button class="good" id="startPomodoroBtn">Старт</button>
-                  <button class="ghost" id="pausePomodoroBtn">Пауза</button>
-                  <button class="danger" id="stopPomodoroBtn">Стоп</button>
-                </div>
-                <div class="small" style="margin-top: 10px">
-                  Засчитывается <b>только</b> рабочее время (work-сессии) → идёт в “Работа сегодня”.
-                </div>
-              </div>
+            <div class="small" style="margin-top:8px;">
+              Совет: отработал фокус-сессию — нажал <b>+25</b> или <b>+50</b>.
             </div>
-
-            <div class="hr"></div>
-
-            <div class="btns">
-              <button id="markDayDoneBtn" class="good">Засчитать день</button>
-              <button id="exportBtn" class="ghost">Экспорт JSON</button>
-              <button id="importBtn" class="ghost">Импорт JSON</button>
-              <button id="clearAllBtn" class="danger">Очистить всё</button>
-            </div>
-            <input id="importFile" type="file" accept="application/json" style="display: none" />
           </div>
 
-          <div class="card" style="margin-top: 14px">
-            <h2>Последние 14 дней</h2>
-            <div id="history"></div>
+          <div>
+            <h2 style="margin:0 0 10px;">Дневной чеклист</h2>
+            <div id="todoList"></div>
+
+            <div class="grid2" style="margin-top:10px;">
+              <div>
+                <label for="newTodoTitle">Добавить пункт</label>
+                <input id="newTodoTitle" type="text" placeholder="Напр: адаптив 1 экрана" />
+              </div>
+              <div style="display:flex; align-items:flex-end; gap:8px;">
+                <button class="good" id="addTodoBtn" style="width:100%;">Добавить</button>
+              </div>
+            </div>
+
+            <div class="btns" style="margin-top:10px;">
+              <button class="ghost" id="copyYesterdayBtn">Скопировать чеклист со вчера</button>
+              <button class="danger" id="resetTodayBtn">Сбросить сегодняшний день</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <footer>
-        Если хочешь — могу допилить: календарь, графики, “штраф за срыв режима”, авто-цель на 6/7/8 часов.
-        <br />Мотивация: Пхукет ближе каждый раз, когда ты засчитываешь день 🌴
-      </footer>
+      <!-- RIGHT -->
+      <div>
+        <div class="card">
+          <h2>Режим</h2>
+          <div class="grid2">
+            <div>
+              <label for="sleepTime">Ложусь (план)</label>
+              <input id="sleepTime" type="time" />
+            </div>
+            <div>
+              <label for="wakeTime">Встаю (план)</label>
+              <input id="wakeTime" type="time" />
+            </div>
+            <div>
+              <label for="workStartTime">Сажусь за комп (план)</label>
+              <input id="workStartTime" type="time" />
+            </div>
+            <div>
+              <label for="startDate">Старт “пути дисциплины”</label>
+              <input id="startDate" type="date" />
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="kpi">
+            <div class="kpiBox">
+              <div class="v" id="kpiStreak">—</div>
+              <div class="t">Серия “день засчитан”</div>
+            </div>
+            <div class="kpiBox">
+              <div class="v" id="kpiDaysDone">—</div>
+              <div class="t">Засчитано дней (за 30)</div>
+            </div>
+            <div class="kpiBox">
+              <div class="v" id="kpiWorkMin">—</div>
+              <div class="t">Фокус сегодня (мин)</div>
+            </div>
+            <div class="kpiBox">
+              <div class="v" id="kpiSleepPlan">—</div>
+              <div class="t">План сна</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="btns">
+            <button id="markDayDoneBtn" class="good">Засчитать день</button>
+            <button id="exportBtn" class="ghost">Экспорт JSON</button>
+            <button id="importBtn" class="ghost">Импорт JSON</button>
+            <button id="clearAllBtn" class="danger">Очистить всё</button>
+          </div>
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h2>Последние 14 дней</h2>
+          <div id="history"></div>
+        </div>
+      </div>
     </div>
 
-    <script>
-      (() => {
-        const LS_KEY = 'discipline_tracker_v1';
+    <footer>
+      Мотивация: Пхукет ближе каждый раз, когда ты честно фиксируешь фокус-время 🌴
+    </footer>
+  </div>
 
-        const $ = id => document.getElementById(id);
+<script>
+(() => {
+  const LS_KEY = "discipline_tracker_v2";
 
-        const els = {
-          headerTags: $('headerTags'),
-          todayLabel: $('todayLabel'),
-          kWorkStart: $('kWorkStart'),
-          kFocus: $('kFocus'),
-          focusTask: $('focusTask'),
-          workMinutesGoal: $('workMinutesGoal'),
-          notes: $('notes'),
-          todoList: $('todoList'),
-          newTodoTitle: $('newTodoTitle'),
-          addTodoBtn: $('addTodoBtn'),
-          copyYesterdayBtn: $('copyYesterdayBtn'),
-          resetTodayBtn: $('resetTodayBtn'),
+  const $ = (id) => document.getElementById(id);
 
-          sleepTime: $('sleepTime'),
-          wakeTime: $('wakeTime'),
-          workStartTime: $('workStartTime'),
-          startDate: $('startDate'),
+  // UUID fallback (без crypto.randomUUID)
+  const uuid = () => (
+    "id_" +
+    Date.now().toString(16) + "_" +
+    Math.random().toString(16).slice(2) + "_" +
+    Math.random().toString(16).slice(2)
+  );
 
-          kpiStreak: $('kpiStreak'),
-          kpiDaysDone: $('kpiDaysDone'),
-          kpiWorkMin: $('kpiWorkMin'),
-          kpiSleepWin: $('kpiSleepWin'),
+  const pad2 = (n) => String(n).padStart(2,"0");
+  const todayISO = () => new Date().toISOString().slice(0,10);
 
-          timerLabel: $('timerLabel'),
-          pomodoroWork: $('pomodoroWork'),
-          pomodoroBreak: $('pomodoroBreak'),
-          startPomodoroBtn: $('startPomodoroBtn'),
-          pausePomodoroBtn: $('pausePomodoroBtn'),
-          stopPomodoroBtn: $('stopPomodoroBtn'),
+  const dateLabel = (iso) => {
+    const d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString("ru-RU", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+  };
 
-          markDayDoneBtn: $('markDayDoneBtn'),
-          exportBtn: $('exportBtn'),
-          importBtn: $('importBtn'),
-          importFile: $('importFile'),
-          clearAllBtn: $('clearAllBtn'),
+  const defaultState = () => ({
+    settings: {
+      sleepTime: "00:30",
+      wakeTime: "09:00",
+      workStartTime: "10:00",
+      startDate: "2026-01-14",
+      workMinutesGoal: 240
+    },
+    days: {
+      // [iso]: { focusTask, notes, todos:[{id,title,done}], workMinutes:int, done:boolean, markedAtISO }
+    }
+  });
 
-          history: $('history'),
-        };
+  const load = () => {
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return defaultState();
+      const data = JSON.parse(raw);
+      if(!data || typeof data !== "object" || !data.settings || !data.days) return defaultState();
+      // migrate minimal fields
+      data.settings.workMinutesGoal = Number(data.settings.workMinutesGoal) || 240;
+      return data;
+    }catch(e){
+      return defaultState();
+    }
+  };
 
-        const pad2 = n => String(n).padStart(2, '0');
-        const todayISO = () => new Date().toISOString().slice(0, 10);
-        const dateLabel = iso => {
-          const d = new Date(iso + 'T00:00:00');
-          return d.toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        };
+  let state = load();
+  const save = () => localStorage.setItem(LS_KEY, JSON.stringify(state));
 
-        const defaultState = () => ({
-          settings: {
-            sleepTime: '00:30',
-            wakeTime: '08:30',
-            workStartTime: '10:00',
-            startDate: '2026-01-14',
-            pomodoroWork: 25,
-            pomodoroBreak: 5,
-            workMinutesGoal: 240,
-          },
-          days: {
-            // [iso]: { focusTask, notes, todos:[{id,title,done}], workMinutes, done:boolean, markedAtISO }
-          },
-        });
+  const getDay = (iso) => {
+    if(!state.days[iso]){
+      state.days[iso] = {
+        focusTask: "",
+        notes: "",
+        todos: [
+          { id: crypto.randomUUID(), title:"Сел за комп вовремя", done:false },
+          { id: crypto.randomUUID(), title:"1 главная задача (двигал)", done:false },
+          { id: crypto.randomUUID(), title:"240 минут фокуса (4 часа)", done:false },
+        ],
+        workMinutes: 0,
+        done: false,
+        markedAtISO: ""
+      };
+      save();
+    }
+    // ensure int
+    state.days[iso].workMinutes = Math.max(0, Number(state.days[iso].workMinutes) || 0);
+    state.days[iso].workMinutes = Math.floor(state.days[iso].workMinutes);
+    return state.days[iso];
+  };
 
-        const load = () => {
-          try {
-            const raw = localStorage.getItem(LS_KEY);
-            if (!raw) return defaultState();
-            const data = JSON.parse(raw);
-            // minimal sanity
-            if (!data || typeof data !== 'object' || !data.settings || !data.days) return defaultState();
-            return data;
-          } catch (e) {
-            return defaultState();
-          }
-        };
+  const escapeHtml = (s) => String(s)
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
 
-        const save = () => localStorage.setItem(LS_KEY, JSON.stringify(state));
+  const els = {
+    headerTags: $("headerTags"),
+    todayLabel: $("todayLabel"),
+    kWorkStart: $("kWorkStart"),
+    kFocus: $("kFocus"),
 
-        let state = load();
+    focusTask: $("focusTask"),
+    workMinutesGoal: $("workMinutesGoal"),
+    notes: $("notes"),
 
-        const getDay = iso => {
-          if (!state.days[iso]) {
-            state.days[iso] = {
-              focusTask: '',
-              notes: '',
-              todos: [
-                { id: crypto.randomUUID(), title: 'Сел за комп вовремя', done: false },
-                { id: crypto.randomUUID(), title: '1 главная задача (двигал)', done: false },
-                { id: crypto.randomUUID(), title: '4 часа фокуса (или 240 мин)', done: false },
-              ],
-              workMinutes: 0,
-              done: false,
-              markedAtISO: '',
-            };
-            save();
-          }
-          return state.days[iso];
-        };
+    manualMinutes: $("manualMinutes"),
+    addMinutesBtn: $("addMinutesBtn"),
+    plus25Btn: $("plus25Btn"),
+    plus50Btn: $("plus50Btn"),
+    minus25Btn: $("minus25Btn"),
+    minus50Btn: $("minus50Btn"),
 
-        const isTimeClose = (planned, actual) => {
-          // returns diff minutes
-          const [ph, pm] = planned.split(':').map(Number);
-          const [ah, am] = actual.split(':').map(Number);
-          return Math.abs(ph * 60 + pm - (ah * 60 + am));
-        };
+    todoList: $("todoList"),
+    newTodoTitle: $("newTodoTitle"),
+    addTodoBtn: $("addTodoBtn"),
+    copyYesterdayBtn: $("copyYesterdayBtn"),
+    resetTodayBtn: $("resetTodayBtn"),
 
-        // --- Pomodoro ---
-        let pom = {
-          running: false,
-          paused: false,
-          mode: 'work', // work | break
-          remainingSec: 25 * 60,
-          intervalId: null,
-        };
+    sleepTime: $("sleepTime"),
+    wakeTime: $("wakeTime"),
+    workStartTime: $("workStartTime"),
+    startDate: $("startDate"),
 
-        const formatMMSS = sec => {
-          const m = Math.floor(sec / 60);
-          const s = sec % 60;
-          return `${pad2(m)}:${pad2(s)}`;
-        };
+    kpiStreak: $("kpiStreak"),
+    kpiDaysDone: $("kpiDaysDone"),
+    kpiWorkMin: $("kpiWorkMin"),
+    kpiSleepPlan: $("kpiSleepPlan"),
 
-        const setTimerLabel = () => (els.timerLabel.textContent = formatMMSS(pom.remainingSec));
+    markDayDoneBtn: $("markDayDoneBtn"),
+    exportBtn: $("exportBtn"),
+    importBtn: $("importBtn"),
+    importFile: $("importFile"),
+    clearAllBtn: $("clearAllBtn"),
 
-        const stopPomodoro = () => {
-          pom.running = false;
-          pom.paused = false;
-          pom.mode = 'work';
-          pom.remainingSec = (Number(state.settings.pomodoroWork) || 25) * 60;
-          if (pom.intervalId) clearInterval(pom.intervalId);
-          pom.intervalId = null;
-          setTimerLabel();
-          renderKPIs();
-        };
+    history: $("history"),
+  };
 
-        const tickPomodoro = () => {
-          if (!pom.running || pom.paused) return;
-          pom.remainingSec -= 1;
+  const getLastNDays = (n) => {
+    const out = [];
+    const now = new Date();
+    for(let i=0;i<n;i++){
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      out.push(d.toISOString().slice(0,10));
+    }
+    return out;
+  };
 
-          // count work time
-          if (pom.mode === 'work') {
-            const iso = todayISO();
-            const day = getDay(iso);
-            day.workMinutes += 1 / 60;
-            // keep as integer minutes later
-          }
+  const calcStreak = (startISO) => {
+    const start = new Date((startISO || "2026-01-14") + "T00:00:00");
+    const now = new Date();
+    let streak = 0;
+    for(let i=0;i<365;i++){
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      if(d < start) break;
+      const iso = d.toISOString().slice(0,10);
+      const day = state.days[iso];
+      if(day && day.done) streak++;
+      else break;
+    }
+    return streak;
+  };
 
-          if (pom.remainingSec <= 0) {
-            // switch mode
-            if (pom.mode === 'work') {
-              pom.mode = 'break';
-              pom.remainingSec = (Number(state.settings.pomodoroBreak) || 5) * 60;
-            } else {
-              pom.mode = 'work';
-              pom.remainingSec = (Number(state.settings.pomodoroWork) || 25) * 60;
-            }
-          }
-          setTimerLabel();
-          renderKPIs();
-          save();
-        };
+  const renderHeaderTags = () => {
+    const iso = todayISO();
+    const day = getDay(iso);
+    const goal = Number(state.settings.workMinutesGoal) || 240;
+    const workMin = Math.floor(day.workMinutes || 0);
 
-        const startPomodoro = () => {
-          if (!pom.running) {
-            pom.running = true;
-            pom.paused = false;
-            if (!pom.intervalId) {
-              pom.intervalId = setInterval(tickPomodoro, 1000);
-            }
-          } else {
-            pom.paused = false;
-          }
-        };
+    const doneTxt = day.done ? "день засчитан" : "не засчитан";
+    const doneCls = day.done ? "ok" : "no";
 
-        const pausePomodoro = () => {
-          if (pom.running) pom.paused = true;
-        };
+    const ratio = goal ? Math.min(999, Math.round((workMin/goal)*100)) : 0;
+    const ratioCls = ratio >= 100 ? "ok" : (ratio >= 60 ? "warn" : "no");
 
-        // --- UI ---
-        const renderHeaderTags = () => {
-          const iso = todayISO();
-          const day = getDay(iso);
-
-          const goal = Number(state.settings.workMinutesGoal) || 240;
-          const workMin = Math.round(day.workMinutes);
-
-          const doneTxt = day.done ? 'день засчитан' : 'не засчитан';
-          const doneCls = day.done ? 'ok' : 'no';
-
-          const ratio = Math.min(100, Math.round((workMin / goal) * 100));
-          const ratioCls = ratio >= 100 ? 'ok' : ratio >= 60 ? 'warn' : 'no';
-
-          els.headerTags.innerHTML = `
+    els.headerTags.innerHTML = `
       <span class="tag"><span>Сегодня:</span> <b class="${doneCls}">${doneTxt}</b></span>
-      <span class="tag"><span>Фокус:</span> <b>${(day.focusTask || '—').slice(0, 24)}</b></span>
       <span class="tag"><span>Работа:</span> <b class="${ratioCls}">${workMin}/${goal} мин (${ratio}%)</b></span>
       <span class="tag"><span>Режим:</span> <b>${state.settings.sleepTime} → ${state.settings.wakeTime}</b></span>
     `;
-        };
+  };
 
-        const renderToday = () => {
-          const iso = todayISO();
-          const day = getDay(iso);
-
-          els.todayLabel.textContent = dateLabel(iso);
-          els.kWorkStart.textContent = state.settings.workStartTime || '—';
-          els.kFocus.textContent = day.focusTask ? day.focusTask : '—';
-
-          els.focusTask.value = day.focusTask || '';
-          els.notes.value = day.notes || '';
-          els.workMinutesGoal.value = state.settings.workMinutesGoal ?? 240;
-
-          renderTodos(day);
-          renderHeaderTags();
-        };
-
-        const renderTodos = day => {
-          els.todoList.innerHTML = '';
-          day.todos.forEach(t => {
-            const wrap = document.createElement('div');
-            wrap.className = 'todoItem';
-            wrap.innerHTML = `
-        <input type="checkbox" ${t.done ? 'checked' : ''} data-id="${t.id}" />
+  const renderTodos = (day) => {
+    els.todoList.innerHTML = "";
+    day.todos.forEach((t) => {
+      const wrap = document.createElement("div");
+      wrap.className = "todoItem";
+      wrap.innerHTML = `
+        <input type="checkbox" ${t.done ? "checked":""} data-id="${t.id}" />
         <div class="todoText">
           <div class="title">${escapeHtml(t.title)}</div>
-          <div class="note">${t.done ? 'выполнено' : 'не выполнено'}</div>
+          <div class="note">${t.done ? "выполнено" : "не выполнено"}</div>
         </div>
         <button class="miniBtn danger" data-del="${t.id}">Удалить</button>
       `;
-            els.todoList.appendChild(wrap);
-          });
+      els.todoList.appendChild(wrap);
+    });
 
-          // checkbox listeners
-          els.todoList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', e => {
-              const id = e.target.dataset.id;
-              const item = day.todos.find(x => x.id === id);
-              if (item) {
-                item.done = e.target.checked;
-                save();
-                renderKPIs();
-                renderHeaderTags();
-                renderTodos(day);
-              }
-            });
-          });
-
-          // delete listeners
-          els.todoList.querySelectorAll('button[data-del]').forEach(btn => {
-            btn.addEventListener('click', e => {
-              const id = e.target.dataset.del;
-              day.todos = day.todos.filter(x => x.id !== id);
-              save();
-              renderKPIs();
-              renderHeaderTags();
-              renderTodos(day);
-            });
-          });
-        };
-
-        const renderKPIs = () => {
-          const iso = todayISO();
-          const day = getDay(iso);
-
-          // normalize work minutes to integer
-          day.workMinutes = Math.max(0, Math.round(day.workMinutes));
-
-          // streak based on "done"
-          const start = state.settings.startDate || '2026-01-14';
-          const last30 = getLastNDays(30);
-          const doneCount = last30.filter(d => state.days[d] && state.days[d].done).length;
-
-          const streak = calcStreak(start);
-
-          const goal = Number(state.settings.workMinutesGoal) || 240;
-          const workMin = Math.round(day.workMinutes);
-
-          // simple "sleep window" score (placeholder)
-          // We can't know actual sleep without manual logging; so we score only "plan exists".
-          const sleepScore = state.settings.sleepTime && state.settings.wakeTime ? 'план задан' : 'нет плана';
-
-          els.kpiStreak.textContent = streak;
-          els.kpiDaysDone.textContent = doneCount;
-          els.kpiWorkMin.textContent = workMin;
-          els.kpiSleepWin.textContent = sleepScore;
-
+    els.todoList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener("change", (e) => {
+        const id = e.target.dataset.id;
+        const item = day.todos.find(x => x.id === id);
+        if(item){
+          item.done = e.target.checked;
           save();
-          renderHistory();
-        };
+          renderKPIs();
+          renderHeaderTags();
+          renderTodos(day);
+        }
+      });
+    });
 
-        const renderHistory = () => {
-          const days = getLastNDays(14).reverse(); // oldest -> newest
-          const goal = Number(state.settings.workMinutesGoal) || 240;
+    els.todoList.querySelectorAll("button[data-del]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = e.target.dataset.del;
+        day.todos = day.todos.filter(x => x.id !== id);
+        save();
+        renderKPIs();
+        renderHeaderTags();
+        renderTodos(day);
+      });
+    });
+  };
 
-          els.history.innerHTML = '';
-          days.forEach(iso => {
-            const d = state.days[iso];
-            const done = d?.done ? true : false;
-            const work = Math.round(d?.workMinutes ?? 0);
-            const ratio = goal ? Math.round((work / goal) * 100) : 0;
+  const renderToday = () => {
+    const iso = todayISO();
+    const day = getDay(iso);
 
-            const cls = done ? 'ok' : 'no';
-            const focus = (d?.focusTask || '—').slice(0, 40);
+    els.todayLabel.textContent = dateLabel(iso);
+    els.kWorkStart.textContent = state.settings.workStartTime || "—";
+    els.kFocus.textContent = day.focusTask ? day.focusTask : "—";
 
-            const row = document.createElement('div');
-            row.className = 'todoItem';
-            row.innerHTML = `
+    els.focusTask.value = day.focusTask || "";
+    els.notes.value = day.notes || "";
+    els.workMinutesGoal.value = Number(state.settings.workMinutesGoal) || 240;
+
+    renderTodos(day);
+    renderHeaderTags();
+  };
+
+  const renderKPIs = () => {
+    const iso = todayISO();
+    const day = getDay(iso);
+
+    const last30 = getLastNDays(30);
+    const doneCount = last30.filter(d => (state.days[d] && state.days[d].done)).length;
+
+    els.kpiStreak.textContent = calcStreak(state.settings.startDate);
+    els.kpiDaysDone.textContent = doneCount;
+    els.kpiWorkMin.textContent = Math.floor(day.workMinutes || 0);
+    els.kpiSleepPlan.textContent = (state.settings.sleepTime && state.settings.wakeTime)
+      ? `${state.settings.sleepTime} → ${state.settings.wakeTime}`
+      : "—";
+
+    save();
+    renderHistory();
+  };
+
+  const renderHistory = () => {
+    const days = getLastNDays(14).reverse();
+    const goal = Number(state.settings.workMinutesGoal) || 240;
+
+    els.history.innerHTML = "";
+    days.forEach(iso => {
+      const d = state.days[iso];
+      const done = !!d?.done;
+      const work = Math.floor(d?.workMinutes ?? 0);
+      const ratio = goal ? Math.round((work/goal)*100) : 0;
+      const cls = done ? "ok" : "no";
+      const focus = (d?.focusTask || "—").slice(0,40);
+
+      const row = document.createElement("div");
+      row.className = "todoItem";
+      row.innerHTML = `
         <div class="todoText">
-          <div class="title">${dateLabel(iso)} — <span class="${cls}">${done ? 'засчитан' : 'нет'}</span></div>
+          <div class="title">${escapeHtml(dateLabel(iso))} — <span class="${cls}">${done ? "засчитан" : "нет"}</span></div>
           <div class="note">Фокус: ${escapeHtml(focus)} · Работа: ${work}/${goal} мин (${ratio}%)</div>
         </div>
         <button class="miniBtn ghost" data-open="${iso}">Открыть</button>
       `;
-            els.history.appendChild(row);
-          });
+      els.history.appendChild(row);
+    });
 
-          els.history.querySelectorAll('button[data-open]').forEach(btn => {
-            btn.addEventListener('click', e => {
-              const iso = e.target.dataset.open;
-              openDayModal(iso);
-            });
-          });
-        };
+    els.history.querySelectorAll("button[data-open]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const iso = e.target.dataset.open;
+        const d = getDay(iso);
+        const goal = Number(state.settings.workMinutesGoal) || 240;
+        const work = Math.floor(d.workMinutes || 0);
 
-        const openDayModal = iso => {
-          const d = getDay(iso);
-          const goal = Number(state.settings.workMinutesGoal) || 240;
-          const work = Math.round(d.workMinutes ?? 0);
+        const details = [
+          `Дата: ${dateLabel(iso)}`,
+          `Засчитан: ${d.done ? "да" : "нет"}`,
+          `Фокус: ${d.focusTask || "—"}`,
+          `Работа: ${work}/${goal} минут`,
+          `Чеклист:`,
+          ...d.todos.map(t => ` - [${t.done ? "x":" "}] ${t.title}`),
+          `Заметки: ${d.notes || "—"}`
+        ].join("\n");
 
-          const details = [
-            `Дата: ${dateLabel(iso)}`,
-            `Засчитан: ${d.done ? 'да' : 'нет'}`,
-            `Фокус: ${d.focusTask || '—'}`,
-            `Работа: ${work}/${goal} минут`,
-            `Чеклист:`,
-            ...d.todos.map(t => ` - [${t.done ? 'x' : ' '}] ${t.title}`),
-            `Заметки: ${d.notes || '—'}`,
-          ].join('\n');
+        alert(details);
+      });
+    });
+  };
 
-          alert(details);
-        };
+  const addMinutes = (mins) => {
+    const iso = todayISO();
+    const day = getDay(iso);
+    const next = Math.max(0, Math.floor(day.workMinutes || 0) + Math.floor(mins));
+    day.workMinutes = next;
+    save();
+    renderKPIs();
+    renderHeaderTags();
+  };
 
-        const getLastNDays = n => {
-          const out = [];
-          const now = new Date();
-          for (let i = 0; i < n; i++) {
-            const d = new Date(now);
-            d.setDate(now.getDate() - i);
-            out.push(d.toISOString().slice(0, 10));
-          }
-          return out;
-        };
+  const bind = () => {
+    // settings init
+    els.sleepTime.value = state.settings.sleepTime || "";
+    els.wakeTime.value = state.settings.wakeTime || "";
+    els.workStartTime.value = state.settings.workStartTime || "";
+    els.startDate.value = state.settings.startDate || "2026-01-14";
 
-        const calcStreak = startISO => {
-          // streak counts consecutive "done" from today backwards, but not earlier than start date
-          const start = new Date(startISO + 'T00:00:00');
-          const now = new Date();
-          let streak = 0;
-          for (let i = 0; i < 365; i++) {
-            const d = new Date(now);
-            d.setDate(now.getDate() - i);
-            if (d < start) break;
-            const iso = d.toISOString().slice(0, 10);
-            const day = state.days[iso];
-            if (day && day.done) {
-              streak++;
-            } else {
-              break;
-            }
-          }
-          return streak;
-        };
+    els.sleepTime.addEventListener("change", () => { state.settings.sleepTime = els.sleepTime.value; save(); renderKPIs(); renderHeaderTags(); });
+    els.wakeTime.addEventListener("change", () => { state.settings.wakeTime = els.wakeTime.value; save(); renderKPIs(); renderHeaderTags(); });
+    els.workStartTime.addEventListener("change", () => { state.settings.workStartTime = els.workStartTime.value; save(); renderToday(); });
+    els.startDate.addEventListener("change", () => { state.settings.startDate = els.startDate.value; save(); renderKPIs(); });
 
-        const escapeHtml = s =>
-          String(s)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
+    // today fields
+    els.focusTask.addEventListener("input", () => {
+      const d = getDay(todayISO());
+      d.focusTask = els.focusTask.value;
+      save();
+      renderHeaderTags();
+      renderToday();
+    });
 
-        // --- Events ---
-        const bind = () => {
-          // settings
-          els.sleepTime.value = state.settings.sleepTime || '';
-          els.wakeTime.value = state.settings.wakeTime || '';
-          els.workStartTime.value = state.settings.workStartTime || '';
-          els.startDate.value = state.settings.startDate || '2026-01-14';
-          els.pomodoroWork.value = state.settings.pomodoroWork ?? 25;
-          els.pomodoroBreak.value = state.settings.pomodoroBreak ?? 5;
+    els.notes.addEventListener("input", () => {
+      const d = getDay(todayISO());
+      d.notes = els.notes.value;
+      save();
+    });
 
-          els.sleepTime.addEventListener('change', () => {
-            state.settings.sleepTime = els.sleepTime.value;
-            save();
-            renderKPIs();
-            renderHeaderTags();
-          });
-          els.wakeTime.addEventListener('change', () => {
-            state.settings.wakeTime = els.wakeTime.value;
-            save();
-            renderKPIs();
-            renderHeaderTags();
-          });
-          els.workStartTime.addEventListener('change', () => {
-            state.settings.workStartTime = els.workStartTime.value;
-            save();
-            renderToday();
-          });
-          els.startDate.addEventListener('change', () => {
-            state.settings.startDate = els.startDate.value;
-            save();
-            renderKPIs();
-          });
+    els.workMinutesGoal.addEventListener("change", () => {
+      const v = Math.max(60, Number(els.workMinutesGoal.value) || 240);
+      state.settings.workMinutesGoal = v;
+      save();
+      renderKPIs();
+      renderHeaderTags();
+    });
 
-          els.pomodoroWork.addEventListener('change', () => {
-            state.settings.pomodoroWork = Number(els.pomodoroWork.value) || 25;
-            if (!pom.running) stopPomodoro();
-            save();
-          });
-          els.pomodoroBreak.addEventListener('change', () => {
-            state.settings.pomodoroBreak = Number(els.pomodoroBreak.value) || 5;
-            save();
-          });
+    // manual minutes
+    els.addMinutesBtn.addEventListener("click", () => {
+      const mins = Number(els.manualMinutes.value);
+      if(!mins || mins <= 0) return;
+      addMinutes(mins);
+      els.manualMinutes.value = "";
+    });
+    els.plus25Btn.addEventListener("click", () => addMinutes(25));
+    els.plus50Btn.addEventListener("click", () => addMinutes(50));
+    els.minus25Btn.addEventListener("click", () => addMinutes(-25));
+    els.minus50Btn.addEventListener("click", () => addMinutes(-50));
 
-          // today fields
-          els.focusTask.addEventListener('input', () => {
-            const d = getDay(todayISO());
-            d.focusTask = els.focusTask.value;
-            save();
-            renderHeaderTags();
-            renderToday();
-          });
+    // todos
+    els.addTodoBtn.addEventListener("click", () => {
+      const title = (els.newTodoTitle.value || "").trim();
+      if(!title) return;
+      const d = getDay(todayISO());
+      d.todos.unshift({ id: crypto.randomUUID(), title, done:false });
+      els.newTodoTitle.value = "";
+      save();
+      renderTodos(d);
+      renderKPIs();
+      renderHeaderTags();
+    });
 
-          els.notes.addEventListener('input', () => {
-            const d = getDay(todayISO());
-            d.notes = els.notes.value;
-            save();
-          });
+    els.copyYesterdayBtn.addEventListener("click", () => {
+      const dToday = getDay(todayISO());
+      const y = new Date();
+      y.setDate(y.getDate()-1);
+      const yISO = y.toISOString().slice(0,10);
+      const dY = state.days[yISO];
+      if(!dY){
+        alert("Вчерашнего дня нет в данных.");
+        return;
+      }
+      dToday.todos = (dY.todos || []).map(t => ({ id: crypto.randomUUID(), title: t.title, done:false }));
+      save();
+      renderTodos(dToday);
+      renderKPIs();
+      renderHeaderTags();
+    });
 
-          els.workMinutesGoal.addEventListener('change', () => {
-            const v = Math.max(60, Number(els.workMinutesGoal.value) || 240);
-            state.settings.workMinutesGoal = v;
-            save();
-            renderKPIs();
-            renderHeaderTags();
-          });
+    els.resetTodayBtn.addEventListener("click", () => {
+      if(!confirm("Сбросить данные сегодняшнего дня?")) return;
+      const iso = todayISO();
+      delete state.days[iso];
+      save();
+      renderToday();
+      renderKPIs();
+    });
 
-          els.addTodoBtn.addEventListener('click', () => {
-            const title = (els.newTodoTitle.value || '').trim();
-            if (!title) return;
-            const d = getDay(todayISO());
-            d.todos.unshift({ id: crypto.randomUUID(), title, done: false });
-            els.newTodoTitle.value = '';
-            save();
-            renderTodos(d);
-            renderKPIs();
-            renderHeaderTags();
-          });
+    // mark day done
+    els.markDayDoneBtn.addEventListener("click", () => {
+      const iso = todayISO();
+      const d = getDay(iso);
+      const goal = Number(state.settings.workMinutesGoal) || 240;
+      const workMin = Math.floor(d.workMinutes || 0);
 
-          els.copyYesterdayBtn.addEventListener('click', () => {
-            const dToday = getDay(todayISO());
-            const y = new Date();
-            y.setDate(y.getDate() - 1);
-            const yISO = y.toISOString().slice(0, 10);
-            const dY = state.days[yISO];
-            if (!dY) {
-              alert('Вчерашнего дня нет в данных.');
-              return;
-            }
-            dToday.todos = dY.todos.map(t => ({ id: crypto.randomUUID(), title: t.title, done: false }));
-            save();
-            renderTodos(dToday);
-            renderKPIs();
-            renderHeaderTags();
-          });
+      const allChecked = d.todos.length > 0 && d.todos.every(t => t.done);
+      const enoughWork = workMin >= goal;
 
-          els.resetTodayBtn.addEventListener('click', () => {
-            if (!confirm('Сбросить данные сегодняшнего дня?')) return;
-            const iso = todayISO();
-            delete state.days[iso];
-            save();
-            renderToday();
-            renderKPIs();
-          });
+      if(!(allChecked || enoughWork)){
+        alert(
+          `Пока рано засчитывать день.\n` +
+          `Нужно либо:\n` +
+          `- отметить все пункты чеклиста\n` +
+          `- либо набрать ${goal} минут фокуса (сейчас ${workMin})`
+        );
+        return;
+      }
 
-          // Pomodoro buttons
-          els.startPomodoroBtn.addEventListener('click', () => startPomodoro());
-          els.pausePomodoroBtn.addEventListener('click', () => pausePomodoro());
-          els.stopPomodoroBtn.addEventListener('click', () => stopPomodoro());
+      d.done = true;
+      d.markedAtISO = new Date().toISOString();
+      save();
+      renderHeaderTags();
+      renderKPIs();
+      alert("День засчитан. Так держать.");
+    });
 
-          // Mark day done
-          els.markDayDoneBtn.addEventListener('click', () => {
-            const iso = todayISO();
-            const d = getDay(iso);
-            const goal = Number(state.settings.workMinutesGoal) || 240;
-            const workMin = Math.round(d.workMinutes || 0);
+    // export/import/clear
+    els.exportBtn.addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "discipline-tracker-export.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
 
-            // "done" criteria: checklist all done OR workMin >= goal
-            const allChecked = d.todos.length > 0 && d.todos.every(t => t.done);
-            const enoughWork = workMin >= goal;
-
-            const ok = allChecked || enoughWork;
-            if (!ok) {
-              const msg = [
-                'Пока рано засчитывать день.',
-                `Нужно либо:`,
-                `- отметить все пункты чеклиста`,
-                `- либо набрать ${goal} минут работы (сейчас ${workMin})`,
-              ].join('\n');
-              alert(msg);
-              return;
-            }
-            d.done = true;
-            d.markedAtISO = new Date().toISOString();
-            save();
-            renderHeaderTags();
-            renderKPIs();
-            alert('День засчитан. Красавчик.');
-          });
-
-          // Export / Import / Clear
-          els.exportBtn.addEventListener('click', () => {
-            const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'discipline-tracker-export.json';
-            a.click();
-            URL.revokeObjectURL(a.href);
-          });
-
-          els.importBtn.addEventListener('click', () => els.importFile.click());
-          els.importFile.addEventListener('change', async () => {
-            const file = els.importFile.files?.[0];
-            if (!file) return;
-            try {
-              const text = await file.text();
-              const data = JSON.parse(text);
-              if (!data || !data.settings || !data.days) throw new Error('bad format');
-              state = data;
-              save();
-              stopPomodoro();
-              init();
-              alert('Импорт готов.');
-            } catch (e) {
-              alert('Не смог импортировать JSON. Проверь файл.');
-            } finally {
-              els.importFile.value = '';
-            }
-          });
-
-          els.clearAllBtn.addEventListener('click', () => {
-            if (!confirm('Точно очистить всё? Это удалит все дни и настройки.')) return;
-            localStorage.removeItem(LS_KEY);
-            state = defaultState();
-            save();
-            stopPomodoro();
-            init();
-          });
-        };
-
-        const initPomodoroFromSettings = () => {
-          pom.running = false;
-          pom.paused = false;
-          pom.mode = 'work';
-          pom.remainingSec = (Number(state.settings.pomodoroWork) || 25) * 60;
-          if (pom.intervalId) clearInterval(pom.intervalId);
-          pom.intervalId = setInterval(tickPomodoro, 1000);
-          pom.paused = true; // keep paused until Start
-          setTimerLabel();
-        };
-
-        const init = () => {
-          renderToday();
-          renderKPIs();
-          renderHeaderTags();
-          initPomodoroFromSettings();
-        };
-
-        bind();
+    els.importBtn.addEventListener("click", () => els.importFile.click());
+    els.importFile.addEventListener("change", async () => {
+      const file = els.importFile.files?.[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if(!data || !data.settings || !data.days) throw new Error("bad format");
+        state = data;
+        // normalize
+        state.settings.workMinutesGoal = Number(state.settings.workMinutesGoal) || 240;
+        save();
         init();
-      })();
-    </script>
-  </body>
+        alert("Импорт готов.");
+      }catch(e){
+        alert("Не смог импортировать JSON. Проверь файл.");
+      } finally {
+        els.importFile.value = "";
+      }
+    });
+
+    els.clearAllBtn.addEventListener("click", () => {
+      if(!confirm("Точно очистить всё? Это удалит все дни и настройки.")) return;
+      localStorage.removeItem(LS_KEY);
+      state = defaultState();
+      save();
+      init();
+    });
+  };
+
+  const init = () => {
+    renderToday();
+    renderKPIs();
+    renderHeaderTags();
+  };
+
+  bind();
+  init();
+})();
+</script>
+</body>
 </html>
